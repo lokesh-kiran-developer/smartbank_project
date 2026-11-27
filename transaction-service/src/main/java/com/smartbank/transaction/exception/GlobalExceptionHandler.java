@@ -23,19 +23,19 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorBody(HttpStatus.BAD_REQUEST, message), HttpStatus.BAD_REQUEST);
     }
 
-    // account-service said 404 / 409 etc. — pass that status through
-    // rather than pretending the service is down.
+    @ExceptionHandler(TransferNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleTransferNotFound(TransferNotFoundException ex) {
+        return new ResponseEntity<>(errorBody(HttpStatus.NOT_FOUND, ex.getMessage()), HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(HttpClientErrorException.class)
     public ResponseEntity<Map<String, Object>> handleDownstreamClientError(HttpClientErrorException ex) {
         HttpStatus status = HttpStatus.valueOf(ex.getStatusCode().value());
         return new ResponseEntity<>(errorBody(status, ex.getResponseBodyAsString()), status);
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, Object>> handleRuntime(RuntimeException ex) {
-        // Catches the circuit breaker fallback exception from AccountClient too —
-        // if account-service is down, this returns a clean 503 instead of a
-        // raw stack trace leaking to the caller.
+    @ExceptionHandler(AccountServiceUnavailableException.class)
+    public ResponseEntity<Map<String, Object>> handleAccountServiceUnavailable(AccountServiceUnavailableException ex) {
         return new ResponseEntity<>(
                 errorBody(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage()),
                 HttpStatus.SERVICE_UNAVAILABLE);

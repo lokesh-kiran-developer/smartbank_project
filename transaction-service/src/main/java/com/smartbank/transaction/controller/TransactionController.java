@@ -28,4 +28,9 @@ public class TransactionController {
         TransferResponse response = transactionService.processTransfer(request, idempotencyKey);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<TransferResponse> getTransfer(@PathVariable Long id) {
+        return ResponseEntity.ok(transactionService.getTransfer(id));
+    }
 }
